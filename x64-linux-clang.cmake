@@ -1,12 +1,12 @@
 # This triplet is tested in vcpkg ci via https://github.com/microsoft/vcpkg/pull/25897
-set(VCPKG_TARGET_ARCHITECTURE x64)
-set(VCPKG_CRT_LINKAGE dynamic)
-set(VCPKG_LIBRARY_LINKAGE dynamic)
+set(VCPKG_TARGET_ARCHITECTURE   x64)
+set(VCPKG_CRT_LINKAGE   dynamic)
+set(VCPKG_LIBRARY_LINKAGE   static)
 
 ## Toolchain setup
 set(VCPKG_TARGET_TRIPLET "x64-linux-clang")
 set(VCPKG_CMAKE_CONFIGURE_OPTIONS "-DVCPKG_TARGET_TRIPLET=${VCPKG_TARGET_TRIPLET}")
-set(VCPKG_CHAINLOAD_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/x64-linux-llvm/clang-toolchain.cmake")
+#set(VCPKG_CHAINLOAD_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/x64-linux-llvm/clang-toolchain.cmake")
 
 
 # Ensure vcpkg recognizes Linux platform

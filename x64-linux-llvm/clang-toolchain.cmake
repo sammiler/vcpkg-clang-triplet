@@ -11,8 +11,14 @@ set(CMAKE_C_COMPILER "clang" CACHE PATH "C compiler" FORCE)
 set(CMAKE_CXX_COMPILER "clang++" CACHE PATH "C++ compiler" FORCE)
 
 
-message(STATUS "Using Clang  C  compiler        ${CMAKE_C_COMPILER}"   )
-message(STATUS "Using Clang  CXX  compiler   ${CMAKE_CXX_COMPILER}"   )
+message(STATUS "Using Clang  C  compiler:  ${CMAKE_C_COMPILER}"   )
+message(STATUS "Using Clang  CXX  compiler :${CMAKE_CXX_COMPILER}"   )
+
+
+
+# !! 新增：为 vcpkg 启动的子进程设置环境变量 !!
+set(ENV{CC} "clang")
+set(ENV{CXX} "clang++")
 # --- C 标准设置 ---
 # 使用 gnu11 可能对 Autotools 项目更友好，它们有时依赖 GNU extensions
 set(CMAKE_C_STANDARD 11 CACHE STRING "C standard")
@@ -25,6 +31,11 @@ set(CMAKE_CXX_STANDARD 17 CACHE STRING "C++ standard")
 set(CMAKE_CXX_STANDARD_REQUIRED ON CACHE BOOL "")
 set(CMAKE_CXX_EXTENSIONS OFF CACHE BOOL "") # C++ 通常不需要 extensions
 set(std_cxx_flags "-std=c++17")
+
+
+# !! 强制设置系统处理器架构 !!
+set(CMAKE_SYSTEM_PROCESSOR "x86_64" CACHE STRING "System Processor" FORCE)
+set(CMAKE_SYSTEM_NAME ${VCPKG_CMAKE_SYSTEM_NAME} CACHE STRING "CMake System Name" FORCE) # 从 vcpkg 变量同步
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # --- 移除特定架构优化 ---
@@ -40,7 +51,7 @@ set(VCPKG_CRT_FLAG "") # VCPKG_CRT_FLAG 变量本身通常不是标准 CMake 或
 
 # --- 基础编译器标志 ---
 # 只设置最基本的标志，移除 LTO、Sanitizer、arch_flags 等
-set(CMAKE_C_FLAGS "${std_c_flags} ${arch_flags} ${VCPKG_C_FLAGS}" CACHE STRING "" FORCE)
+set(CMAKE_C_FLAGS "${std_c_flags}   ${arch_flags} ${VCPKG_C_FLAGS}" CACHE STRING "" FORCE)
 set(CMAKE_C_FLAGS_DEBUG "-O0 -g -D_DEBUG ${VCPKG_C_FLAGS_DEBUG}" CACHE STRING "" FORCE)
 set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG ${VCPKG_C_FLAGS_RELEASE}" CACHE STRING "" FORCE)
 set(CMAKE_C_FLAGS_MINSIZEREL "-Os -DNDEBUG ${VCPKG_C_FLAGS_RELEASE}" CACHE STRING "" FORCE)
@@ -51,6 +62,11 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${VCPKG_CXX_FLAGS_DEBUG}" CACH
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${VCPKG_CXX_FLAGS_RELEASE}" CACHE STRING "" FORCE) # 沿用 C 的 Release 标志
 set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL} ${VCPKG_CXX_FLAGS_RELEASE}" CACHE STRING "" FORCE) # 沿用 C 的 MinSizeRel 标志
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} ${VCPKG_CXX_FLAGS_RELEASE}" CACHE STRING "" FORCE) # 沿用 C 的 RelWithDebInfo 标志
+
+
+# --- Linker Flags ---
+# 基础链接器标志 (合并 VCPKG 变量)
+set(common_linker_flags "-pthread ${VCPKG_LINKER_FLAGS}")
 
 # --- 基础链接器标志 ---
 # 只设置基本的 Debug/Release 标志，移除 LTO 相关
@@ -79,3 +95,11 @@ unset(std_cxx_flags)
 unset(arch_flags)
 # unset(ignore_werror) # 因为上面注释掉了定义
 # unset(VCPKG_CRT_FLAG) # 因为上面注释掉了定义
+
+
+
+
+# --- Final Debug Output ---
+message(STATUS "Triplet: Final C_FLAGS = ${CMAKE_C_FLAGS}")
+message(STATUS "Triplet: Final CXX_FLAGS = ${CMAKE_CXX_FLAGS}")
+message(STATUS "Triplet: Final EXE_LINKER_FLAGS = ${CMAKE_EXE_LINKER_FLAGS}")
