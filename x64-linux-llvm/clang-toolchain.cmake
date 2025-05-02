@@ -1,3 +1,16 @@
+
+
+
+# 基本 vcpkg 设置
+set(VCPKG_TARGET_TRIPLET "x64-linux-clang" CACHE STRING "vcpkg target triplet")
+# VCPKG_CMAKE_CONFIGURE_OPTIONS 通常在主 triplet 文件中设置，这里不需要重复
+
+# --- 核心编译器设置 ---
+# 强制指定 Clang 编译器
+set(CMAKE_C_COMPILER "clang" CACHE PATH "C compiler" FORCE)
+set(CMAKE_CXX_COMPILER "clang++" CACHE PATH "C++ compiler" FORCE)
+
+
 # --- C 标准设置 ---
 # 使用 gnu11 可能对 Autotools 项目更友好，它们有时依赖 GNU extensions
 set(CMAKE_C_STANDARD 11 CACHE STRING "C standard")
@@ -10,6 +23,7 @@ set(CMAKE_CXX_STANDARD 17 CACHE STRING "C++ standard")
 set(CMAKE_CXX_STANDARD_REQUIRED ON CACHE BOOL "")
 set(CMAKE_CXX_EXTENSIONS OFF CACHE BOOL "") # C++ 通常不需要 extensions
 set(std_cxx_flags "-std=c++17")
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # --- 移除特定架构优化 ---
 # set(arch_flags "-msse4.2 -maes -mpclmul -mcrc32") # 暂时禁用
