@@ -11,8 +11,8 @@ set(CMAKE_C_COMPILER "clang" CACHE PATH "C compiler" FORCE)
 set(CMAKE_CXX_COMPILER "clang++" CACHE PATH "C++ compiler" FORCE)
 
 
-message(STATUS "Using Clang  C  compiler${CMAKE_C_COMPILER}"   )
-message(STATUS "Using Clang  CXX  compiler${CMAKE_CXX_COMPILER}"   )
+message(STATUS "Using Clang  C  compiler        ${CMAKE_C_COMPILER}"   )
+message(STATUS "Using Clang  CXX  compiler   ${CMAKE_CXX_COMPILER}"   )
 # --- C 标准设置 ---
 # 使用 gnu11 可能对 Autotools 项目更友好，它们有时依赖 GNU extensions
 set(CMAKE_C_STANDARD 11 CACHE STRING "C standard")
