@@ -2,7 +2,7 @@
 
 
 # 基本 vcpkg 设置
-set(VCPKG_TARGET_TRIPLET "x64-linux-clang" CACHE STRING "vcpkg target triplet")
+set(VCPKG_TARGET_TRIPLET "x64-linux-llvm" CACHE STRING "vcpkg target triplet")
 # VCPKG_CMAKE_CONFIGURE_OPTIONS 通常在主 triplet 文件中设置，这里不需要重复
 
 # --- 核心编译器设置 ---
