@@ -27,10 +27,10 @@ set(CMAKE_C_EXTENSIONS ON CACHE BOOL "") # 明确启用 C extensions
 set(std_c_flags "-std=gnu11") # 使用 gnu11 而不是 c11
 
 # --- C++ 标准设置 ---
-set(CMAKE_CXX_STANDARD 17 CACHE STRING "C++ standard")
+set(CMAKE_CXX_STANDARD 20 CACHE STRING "C++ standard")
 set(CMAKE_CXX_STANDARD_REQUIRED ON CACHE BOOL "")
 set(CMAKE_CXX_EXTENSIONS OFF CACHE BOOL "") # C++ 通常不需要 extensions
-set(std_cxx_flags "-std=c++17")
+set(std_cxx_flags "-std=c++20")
 
 
 # !! 强制设置系统处理器架构 !!
