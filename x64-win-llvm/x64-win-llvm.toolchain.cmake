@@ -32,11 +32,11 @@ set(std_c_flags "-std:c11 -D__STDC__=1 -Wno-implicit-function-declaration") #/Zc
 # for read/open/access and clang 16 made that an error instead of a warning.
 
 # Set C++ standard.
-set(CMAKE_CXX_STANDARD 17 CACHE STRING "")
+set(CMAKE_CXX_STANDARD 20 CACHE STRING "")
 set(CMAKE_CXX_STANDARD_REQUIRED ON CACHE STRING "")
 set(CMAKE_CXX_EXTENSIONS OFF CACHE STRING "")
 # set(std_cxx_flags "/permissive- -std:c++20 /Zc:__cplusplus")
-set(std_cxx_flags "/permissive- -std:c++17 /Zc:__cplusplus -Wno-register")
+set(std_cxx_flags "/permissive- -std:c++20 /Zc:__cplusplus -Wno-register")
 
 # Set Windows definitions:
 set(windows_defs "/DWIN32")
