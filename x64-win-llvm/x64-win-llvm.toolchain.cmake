@@ -83,37 +83,77 @@ endif()
 set(CMAKE_CL_NOLOGO "/nologo" CACHE STRING "")
 
 
-set(LLVMInstallDir "C:/PROGRA~1/MIB055~1/2022/Enterprise/VC/Tools/Llvm/x64")
-# Set compiler.
-find_program(CLANG_CL_EXECUTBALE # 注意变量名应该是 CLANG_CL_EXECUTABLE，而不是 CLANG-CL_EXECUTBALE
-    NAMES "clang-cl" "clang-cl.exe"
-    PATHS "${LLVMInstallDir}/bin" # 直接在 LLVMInstallDir 下查找 bin 目录
-    PATH_SUFFIXES ""             # PATH_SUFFIXES 在这里可能不需要，因为我们直接指定了 /bin
-    NO_DEFAULT_PATH
-)
-if(NOT CLANG_CL_EXECUTBALE)
-message(SEND_ERROR "clang-cl was not found!") # Not a FATAL_ERROR due to being a toolchain!
-endif()
-
-get_filename_component(LLVM_BIN_DIR "${CLANG_CL_EXECUTBALE}" DIRECTORY)
-list(INSERT CMAKE_PROGRAM_PATH 0 "${LLVM_BIN_DIR}")
 
 #use this path to avoid some msys can not find compiler
-set(CMAKE_C_COMPILER "C:/PROGRA~1/MIB055~1/2022/Enterprise/VC/Tools/Llvm/x64/bin/clang-cl.exe" CACHE PATH "C compiler" FORCE)
-set(CMAKE_CXX_COMPILER "C:/PROGRA~1/MIB055~1/2022/Enterprise/VC/Tools/Llvm/x64/bin/clang-cl.exe" CACHE PATH "C++ compiler" FORCE)
+set(CMAKE_C_COMPILER "clang-cl" CACHE PATH "C compiler" FORCE)
+set(CMAKE_CXX_COMPILER "clang-cl" CACHE PATH "C++ compiler" FORCE)
 # set(CMAKE_C_COMPILER "${CLANG_CL_EXECUTBALE}" CACHE STRING "")
 # set(CMAKE_CXX_COMPILER "${CLANG_CL_EXECUTBALE}" CACHE STRING "")
-set(CMAKE_AR "C:/PROGRA~1/MIB055~1/2022/Enterprise/VC/Tools/Llvm/x64/bin/llvm-lib.exe" CACHE STRING "")
+set(CMAKE_AR "llvm-lib" CACHE STRING "")
 #set(CMAKE_AR "${LLVM_BIN_DIR}/llvm-ar.exe" CACHE STRING "")
 #set(CMAKE_RANLIB "${LLVM_BIN_DIR}/llvm-ranlib.exe" CACHE STRING "")
-set(CMAKE_LINKER "C:/PROGRA~1/MIB055~1/2022/Enterprise/VC/Tools/Llvm/x64/bin/lld-link.exe" CACHE STRING "")
+set(CMAKE_LINKER "lld-link" CACHE STRING "")
 #set(CMAKE_LINKER "${CLANG_CL_EXECUTBALE}" CACHE STRING "")
 #set(CMAKE_LINKER "link.exe" CACHE STRING "" FORCE)
-set(CMAKE_ASM_MASM_COMPILER "ml64.exe" CACHE STRING "")
+set(CMAKE_ASM_MASM_COMPILER "ml64" CACHE STRING "")
 #set(CMAKE_RC_COMPILER "${LLVM_BIN_DIR}/llvm-rc.exe" CACHE STRING "" FORCE)
-set(CMAKE_RC_COMPILER "rc.exe" CACHE STRING "")
-set(CMAKE_MT "mt.exe" CACHE STRING "")
+set(CMAKE_RC_COMPILER "rc" CACHE STRING "")
+set(CMAKE_MT "mt" CACHE STRING "")
 ### CUDA section nvcc
+
+
+get_filename_component(LLVM_BIN_DIR "${CMAKE_C_COMPILER}" DIRECTORY)
+
+# 将提取出的目录插入到 CMAKE_PROGRAM_PATH 的最前面
+# 这可以帮助 CMake 找到同一个目录下的其他工具，如 lld-link.exe, llvm-ar.exe 等
+list(INSERT CMAKE_PROGRAM_PATH 0 "${LLVM_BIN_DIR}")
+
+
+# 在第一次配置时，CMake可能还没有完全填充这些变量的路径，
+# 我们使用 find_program 确保能找到它们的完整路径用于检查。
+find_program(C_COMPILER_PATH NAMES ${CMAKE_C_COMPILER})
+find_program(AR_PATH NAMES ${CMAKE_AR})
+find_program(LINKER_PATH NAMES ${CMAKE_LINKER})
+
+# =================================================================
+# 检查工具链可执行文件是否位于 "bin" 目录中
+# Check if the toolchain executables are located in a "bin" directory
+#
+# 为了避免因工具链布局不规范而导致的间接构建失败（例如，使用
+# Google GN 的项目），我们强制要求所有关键工具都必须位于一个
+# 名为 "bin" 的目录中。
+# =================================================================
+
+# 定义一个宏来封装检查逻辑，使其可复用
+macro(check_tool_in_bin_directory tool_path tool_name)
+    if(NOT EXISTS "${tool_path}")
+        message(FATAL_ERROR "工具 '${tool_name}' 未找到，路径为: '${tool_path}'。请确保它在系统 PATH 中或提供了完整路径。")
+    endif()
+
+    # 获取可执行文件所在的目录路径
+    get_filename_component(parent_directory "${tool_path}" DIRECTORY)
+    # 获取该目录的名称
+    get_filename_component(parent_directory_name "${parent_directory}" NAME)
+
+    # 检查目录名是否为 "bin"
+    if(NOT parent_directory_name STREQUAL "bin")
+        message(FATAL_ERROR "工具链配置错误!\n"
+                            "  工具 '${tool_name}' ('${tool_path}')\n"
+                            "  必须位于一个名为 'bin' 的目录中才能继续。\n"
+                            "  当前找到的目录是: '${parent_directory}'\n\n"
+                            "  此项检查是为了确保与 Google GN 等对工具链布局有隐式依赖的构建系统兼容，避免潜在的构建失败。")
+    endif()
+endmacro()
+
+# --- 执行检查 ---
+message(STATUS "正在验证工具链布局...")
+
+# C 编译器和 CXX 编译器是同一个，所以只检查一次
+check_tool_in_bin_directory("${C_COMPILER_PATH}" "C/CXX Compiler")
+check_tool_in_bin_directory("${AR_PATH}" "Archiver (AR)")
+check_tool_in_bin_directory("${LINKER_PATH}" "Linker")
+
+message(STATUS "工具链布局验证通过。所有工具均位于 'bin' 目录中。")
 
 if(NOT CUDA_C_COMPILER)
   # Due to nvcc error   : 'cudafe++' died with status 0xC0000409 |  clang-cl cannot currently be used to compile cu files.
